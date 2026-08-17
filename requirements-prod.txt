@@ -1,0 +1,7 @@
+# Production dependencies (slim — no HuggingFace models)
+# For full HuggingFace support, install requirements.txt instead
+fastapi
+uvicorn
+pydantic
+requests
+sqlalchemy

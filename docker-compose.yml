@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - ENABLE_HF_MODELS=false
+      - LOG_DB_PATH=data/logs.db
+      - RATE_LIMIT_MAX=10
+      - RATE_LIMIT_WINDOW=60
+      - STREAM_DELAY_MS=50
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

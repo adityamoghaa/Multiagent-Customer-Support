@@ -244,13 +244,100 @@ multiagent_support/
 
 ---
 
+## 🚀 Week 7 — LLMOps Deployment
+
+### Running Locally
+
+```bash
+# Install all deps (main + dev)
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Start the API server
+uvicorn app.main:app --reload
+# → http://localhost:8000
+# → Dashboard: http://localhost:8000/dashboard
+# → Swagger:   http://localhost:8000/docs
+```
+
+### Running via Docker
+
+```bash
+# Build and start
+docker compose up --build
+
+# Or run in background
+docker compose up --build -d
+```
+
+The API runs on `http://localhost:8000`. Logs persist in `./data/logs.db` via a mounted volume.
+
+### Example: Streaming Chat
+
+```bash
+curl -N -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"customer_id": "cust_001", "query": "I need a refund for my last purchase"}'
+```
+
+Output (Server-Sent Events):
+```
+event: metadata
+data: {"thread_id": "abc-123", "category": "billing", "agent": "Billing Agent", ...}
+
+data: Your
+data: refund
+data: is
+data: being
+data: processed.
+data: Expect
+data: funds
+data: in
+data: 5-7
+data: days.
+event: done
+data: [DONE]
+```
+
+### Example: Rate Limiting
+
+```bash
+# Fire 12 requests rapidly — the 11th will return 429
+for i in $(seq 1 12); do
+  echo -n "Request $i: "
+  curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8000/chat \
+    -H "Content-Type: application/json" \
+    -d '{"customer_id": "rate_test", "query": "help"}'
+  echo
+done
+```
+
+### Dashboard
+
+Visit `http://localhost:8000/dashboard` to see:
+- **Summary cards**: total requests, avg latency, resolution rate (non-escalated), estimated cost
+- **Requests Over Time**: line chart of hourly request volume
+- **Latency Trend**: line chart of average latency per hour
+- **Recent Requests**: table of the 10 most recent queries with category, agent, latency, and cost
+
+### Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ENABLE_HF_MODELS` | `false` | Enable HuggingFace sentiment/suggestion/translation |
+| `LOG_DB_PATH` | `data/logs.db` | Path to the SQLite log database |
+| `RATE_LIMIT_MAX` | `10` | Max requests per customer per window |
+| `RATE_LIMIT_WINDOW` | `60` | Rate limit window in seconds |
+| `STREAM_DELAY_MS` | `50` | Delay between streamed words (ms) |
+
+---
+
 ## 🧪 Running Tests
 
 ```bash
-pytest tests/test_system.py -v
+pytest tests/ -v
 ```
 
----
 
 ## 🤝 Contributing
 

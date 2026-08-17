@@ -1,0 +1,14 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+venv/
+.env
+*.db
+.github/
+tests/
+*.md
+LICENSE
+demo.jpeg
+data/
+.ruff_cache/
